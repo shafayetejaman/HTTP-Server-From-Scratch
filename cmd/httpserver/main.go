@@ -1,6 +1,9 @@
 package main
 
 import (
+	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"io"
 	"log"
 	"net/http"
@@ -13,7 +16,6 @@ import (
 	"tcpTohttp/internal/headers"
 	"tcpTohttp/internal/request"
 	"tcpTohttp/internal/response"
-	"time"
 )
 
 const PORT = 42069
@@ -39,16 +41,21 @@ func handlerfunc(w *response.Writer, req *request.Request) {
 		}
 
 		w.WriteStatusLine(200)
-		headers := headers.NewHeaders()
+		headers, trailers := headers.NewHeaders(), headers.NewHeaders()
 		headers.Set("Transfer-Encoding", "chunked")
-		w.WriteHeaders(headers, []string{"Content-Length"})
+		trailers.Set("X-Content-SHA256", "")
+		trailers.Set("X-Content-Length", "")
 
-		buffer := make([]byte, 32)
+		w.WriteHeaders(headers, []string{"Content-Length"}, trailers)
+
+		buffer := make([]byte, 64)
 		read := 0
 		isEof := false
+		fullBody := bytes.NewBuffer([]byte{})
 		for {
 			if !isEof {
 				n, err := body.Read(buffer[read:])
+				fullBody.Write(buffer[read:n])
 
 				if err != nil {
 					if err != io.EOF {
@@ -73,11 +80,22 @@ func handlerfunc(w *response.Writer, req *request.Request) {
 				if err != nil {
 					log.Println(err)
 				}
+
+				hash := sha256.Sum256(fullBody.Bytes())
+				encodedHash := hex.EncodeToString(hash[:])
+
+				trailers.Replace("X-Content-SHA256", encodedHash)
+				trailers.Replace("X-Content-Length", strconv.Itoa(len([]byte(encodedHash))))
+
+				err := w.WriteTrailers(trailers)
+				if err != nil {
+					log.Println(err)
+				}
 				return
 			}
 			copy(buffer, buffer[n:read])
 			read -= n
-			time.Sleep(1 * time.Second)
+			// time.Sleep(10 * time.Millisecond)
 		}
 	} else {
 
@@ -95,7 +113,7 @@ func handlerfunc(w *response.Writer, req *request.Request) {
 		headers.Set("Content-Length", strconv.Itoa(len(data)))
 		headers.Set("Content-Type", "text/html")
 		w.WriteStatusLine(200)
-		w.WriteHeaders(headers, nil)
+		w.WriteHeaders(headers, nil, nil)
 		w.WriteBody(data)
 	}
 

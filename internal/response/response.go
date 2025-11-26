@@ -85,7 +85,7 @@ func (w *Writer) WriteStatusLine(statusCode StatusCode) error {
 }
 
 func (w *Writer) WriteHeaders(headers *headers.Headers,
-	delHeaders []string) error {
+	delHeaders []string, trailers *headers.Headers) error {
 
 	if w.Status != StatusWriteHeaders {
 		return errors.New("alwady writen Headers")
@@ -96,8 +96,13 @@ func (w *Writer) WriteHeaders(headers *headers.Headers,
 	for key, val := range headers.Headers {
 		defHeaders.Replace(key, val)
 	}
+
 	for _, key := range delHeaders {
 		defHeaders.Delete(key)
+	}
+
+	for key := range trailers.Headers {
+		defHeaders.Set("Trailer", key)
 	}
 
 	err := WriteHeaders(buff, defHeaders)
@@ -137,7 +142,7 @@ func (w *Writer) WriteChunkedBody(p []byte) (int, error) {
 }
 func (w *Writer) WriteChunkedBodyDone() (int, error) {
 
-	data := []byte("0" + CRLF + CRLF)
+	data := []byte("0" + CRLF)
 	read := 0
 	for read < len(data) {
 		n, err := w.Conn.Write(data[read:])
@@ -148,4 +153,14 @@ func (w *Writer) WriteChunkedBodyDone() (int, error) {
 	}
 	return read, nil
 
+}
+func (w *Writer) WriteTrailers(h *headers.Headers) error {
+	for key, val := range h.Headers {
+		_, err := w.Conn.Write([]byte(key + ":" + val + CRLF))
+		if err != nil {
+			return err
+		}
+	}
+	_, err := w.Conn.Write([]byte(CRLF))
+	return err
 }
