@@ -89,6 +89,19 @@ func handlerfunc(w *response.Writer, req *request.Request) {
 				return
 			}
 		}
+
+	} else if url == "/video" {
+		w.WriteStatusLine(200)
+		headers := headers.NewHeaders()
+		headers.Set("Content-Type", "video/mp4")
+		file, err := os.ReadFile("assets/vim.mp4")
+		if err != nil {
+			log.Println("Error reading file:", err)
+			return
+		}
+		headers.Set("Content-Length", strconv.Itoa(len(file)))
+		w.WriteHeaders(headers, nil, nil)
+		w.WriteBody(file)
 	} else {
 
 		data := []byte(`

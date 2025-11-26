@@ -93,16 +93,20 @@ func (w *Writer) WriteHeaders(headers *headers.Headers,
 	buff := bytes.NewBuffer([]byte{})
 	defHeaders := GetDefaultHeaders(0)
 
-	for key, val := range headers.Headers {
-		defHeaders.Replace(key, val)
+	if headers != nil {
+		for key, val := range headers.Headers {
+			defHeaders.Replace(key, val)
+		}
 	}
 
 	for _, key := range delHeaders {
 		defHeaders.Delete(key)
 	}
 
-	for key := range trailers.Headers {
-		defHeaders.Set("Trailer", key)
+	if trailers != nil {
+		for key := range trailers.Headers {
+			defHeaders.Set("Trailer", key)
+		}
 	}
 
 	err := WriteHeaders(buff, defHeaders)
