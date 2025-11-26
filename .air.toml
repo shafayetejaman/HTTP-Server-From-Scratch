@@ -1,0 +1,6 @@
+root = "."
+cmd = "go run ./cmd/httpserver/main.go"
+bin = "tmp/main.exe"
+
+[build]
+cmd = "go build -o ./tmp/main.exe ./cmd/httpserver"

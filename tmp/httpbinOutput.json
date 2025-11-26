@@ -1,0 +1,60 @@
+{
+    "url": "https://httpbin.org/stream/100",
+    "args": {},
+    "headers": {
+        "Host": "httpbin.org",
+        "X-Amzn-Trace-Id": "Root=1-69269935-208449127fbf14e333eda806",
+        "Accept-Encoding": "gzip",
+        "User-Agent": "Go-http-client/2.0"
+    },
+    "origin": "103.24.78.162",
+    "id": 0
+}
+{
+    "url": "https://httpbin.org/stream/100",
+    "args": {},
+    "headers": {
+        "Host": "httpbin.org",
+        "X-Amzn-Trace-Id": "Root=1-69269935-208449127fbf14e333eda806",
+        "Accept-Encoding": "gzip",
+        "User-Agent": "Go-http-client/2.0"
+    },
+    "origin": "103.24.78.162",
+    "id": 1
+}
+{
+    "url": "https://httpbin.org/stream/100",
+    "args": {},
+    "headers": {
+        "Host": "httpbin.org",
+        "X-Amzn-Trace-Id": "Root=1-69269935-208449127fbf14e333eda806",
+        "Accept-Encoding": "gzip",
+        "User-Agent": "Go-http-client/2.0"
+    },
+    "origin": "103.24.78.162",
+    "id": 2
+}
+{
+    "url": "https://httpbin.org/stream/100",
+    "args": {},
+    "headers": {
+        "Host": "httpbin.org",
+        "X-Amzn-Trace-Id": "Root=1-69269935-208449127fbf14e333eda806",
+        "Accept-Encoding": "gzip",
+        "User-Agent": "Go-http-client/2.0"
+    },
+    "origin": "103.24.78.162",
+    "id": 3
+}
+{
+    "url": "https://httpbin.org/stream/100",
+    "args": {},
+    "headers": {
+        "Host": "httpbin.org",
+        "X-Amzn-Trace-Id": "Root=1-69269935-208449127fbf14e333eda806",
+        "Accept-Encoding": "gzip",
+        "User-Agent": "Go-http-client/2.0"
+    },
+    "origin": "103.24.78.162",
+    "id": 4
+}

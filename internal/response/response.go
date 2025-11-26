@@ -84,7 +84,9 @@ func (w *Writer) WriteStatusLine(statusCode StatusCode) error {
 	return nil
 }
 
-func (w *Writer) WriteHeaders(headers *headers.Headers) error {
+func (w *Writer) WriteHeaders(headers *headers.Headers,
+	delHeaders []string) error {
+
 	if w.Status != StatusWriteHeaders {
 		return errors.New("alwady writen Headers")
 	}
@@ -92,8 +94,10 @@ func (w *Writer) WriteHeaders(headers *headers.Headers) error {
 	defHeaders := GetDefaultHeaders(0)
 
 	for key, val := range headers.Headers {
-		defHeaders.Set(key, val)
-
+		defHeaders.Replace(key, val)
+	}
+	for _, key := range delHeaders {
+		defHeaders.Delete(key)
 	}
 
 	err := WriteHeaders(buff, defHeaders)
@@ -112,5 +116,36 @@ func (w *Writer) WriteBody(p []byte) (int, error) {
 	return w.Conn.Write(p)
 }
 
-func (w *Writer) WriteChunkedBody(p []byte) (int, error)
-func (w *Writer) WriteChunkedBodyDone() (int, error)
+func (w *Writer) WriteChunkedBody(p []byte) (int, error) {
+	lengthLine := strconv.FormatInt(int64(len(p)), 16) + CRLF
+
+	var buf bytes.Buffer
+	buf.WriteString(lengthLine)
+	buf.Write(p)
+	buf.WriteString(CRLF)
+
+	data := buf.Bytes()
+	read := 0
+	for read < len(data) {
+		n, err := w.Conn.Write(data[read:])
+		if err != nil {
+			return 0, err
+		}
+		read += n
+	}
+	return len(p), nil
+}
+func (w *Writer) WriteChunkedBodyDone() (int, error) {
+
+	data := []byte("0" + CRLF + CRLF)
+	read := 0
+	for read < len(data) {
+		n, err := w.Conn.Write(data[read:])
+		if err != nil {
+			return 0, err
+		}
+		read += n
+	}
+	return read, nil
+
+}

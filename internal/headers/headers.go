@@ -20,10 +20,17 @@ func (h *Headers) Get(key string) string {
 func (h *Headers) Set(key, val string) {
 	key = strings.ToLower(key)
 
-	// if oldVal, ok := h.Headers[key]; ok {
-	// 	val = oldVal + "," + val
-	// }
+	if oldVal, ok := h.Headers[key]; ok {
+		val = oldVal + "," + val
+	}
 	h.Headers[key] = val
+}
+func (h *Headers) Replace(key, val string) {
+	key = strings.ToLower(key)
+	h.Headers[key] = val
+}
+func (h *Headers) Delete(key string) {
+	delete(h.Headers, strings.ToLower(key))
 }
 
 const CRLF = "\r\n"
