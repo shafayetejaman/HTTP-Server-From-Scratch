@@ -49,33 +49,28 @@ func handlerfunc(w *response.Writer, req *request.Request) {
 		w.WriteHeaders(headers, []string{"Content-Length"}, trailers)
 
 		buffer := make([]byte, 64)
-		read := 0
 		isEof := false
 		fullBody := bytes.NewBuffer([]byte{})
 		for {
-			if !isEof {
-				n, err := body.Read(buffer[read:])
-				fullBody.Write(buffer[read:n])
+			n, err := body.Read(buffer)
 
-				if err != nil {
-					if err != io.EOF {
-
-						log.Println(err)
-						return
-					} else {
-						isEof = true
-					}
+			if err != nil {
+				if err != io.EOF {
+					log.Println(err)
+					return
+				} else {
+					isEof = true
 				}
-				read += n
 			}
+			fullBody.Write(buffer[:n])
 
-			n, err := w.WriteChunkedBody(buffer[:read])
+			_, err = w.WriteChunkedBody(buffer[:n])
 			if err != nil {
 				log.Println(err)
 				return
 			}
 
-			if n == 0 {
+			if isEof {
 				_, err = w.WriteChunkedBodyDone()
 				if err != nil {
 					log.Println(err)
@@ -93,9 +88,6 @@ func handlerfunc(w *response.Writer, req *request.Request) {
 				}
 				return
 			}
-			copy(buffer, buffer[n:read])
-			read -= n
-			// time.Sleep(10 * time.Millisecond)
 		}
 	} else {
 
